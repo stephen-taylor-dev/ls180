@@ -436,3 +436,130 @@ SELECT events.name AS event, events.starts_at, sections.name AS section, seats.r
     INNER JOIN sections
         ON seats.section_id = sections.id
     WHERE customers.email = 'gennaro.rath@mcdermott.co';
+
+
+
+
+
+
+
+
+
+ALTER TABLE orders
+    ADD CONSTRAINT orders_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id);
+
+INSERT INTO products
+    (name)
+    VALUES ('small bolt'),
+    ('large bolt');
+
+
+INSERT INTO orders
+    (product_id, quantity)
+    VALUES ((SELECT id FROM products WHERE name = 'small bolt'), 10),
+    ((SELECT id FROM products WHERE name = 'small bolt'), 25),
+    ((SELECT id FROM products WHERE name = 'large bolt'), 10);
+
+-- OR this
+INSERT INTO orders (product_id, quantity) VALUES (1, 10);
+
+UPDATE orders
+SET quantity = 15
+WHERE product_id = 2;
+
+SELECT quantity, name FROM orders
+    INNER JOIN products ON orders.product_id = products.id;
+
+
+INSERT INTO orders
+    ( quantity)
+    VALUES (10);
+
+ALTER TABLE orders
+    ALTER COLUMN product_id
+    SET NOT NULL;
+
+UPDATE orders
+SET product_id = 2 WHERE id = 7;
+
+
+
+CREATE TABLE reviews (
+    id serial PRIMARY KEY,
+    product_id integer REFERENCES products(id),
+    review text
+);
+
+ALTER TABLE reviews
+    ALTER COLUMN review
+    SET NOT NULL;
+
+INSERT INTO reviews
+    (product_id, review)
+    VALUES (1, 'little small'),
+           (1, 'very round!'),
+           (2, 'could have been smaller'); 
+
+INSERT INTO reviews
+    (review)
+    VALUES ( 'little small'),
+
+
+INSERT INTO calls
+    ("when", duration, contact_id)
+    VALUES ('2016-01-18 14:47:00', 632, 6);
+
+
+SELECT calls.when, calls.duration, contacts.first_name
+    FROM calls
+    INNER JOIN contacts ON calls.contact_id = contacts.id
+    WHERE contacts.first_name != 'William' AND contacts.last_name != 'Swift';
+
+-- alternate where claus
+WHERE (contacts.first_name || ' ' || contacts.last_name) != 'William Swift';
+
+
+INSERT INTO contacts (first_name, last_name, number)
+    VALUES ('Merve', 'Elk', '6343511126'),
+           ('Sawa', 'Fyodorov', '6125594874');
+
+INSERT INTO calls 
+        ("when", duration, contact_id)
+    VALUES ('2016-01-17 11:52:00', 175, 26),
+           ('2016-01-18 21:22:00', 79, 26);
+
+
+ALTER TABLE contacts
+    ADD constraint unique_number UNIQUE (number);
+
+
+INSERT INTO contacts (first_name, last_name, number)
+    VALUES ('jo', 'hog', '6343511126'),
+          
+ ALTER TABLE stars
+    ALTER COLUMN spectral_type
+    TYPE star_spectral_type
+    USING spectral_type::star_spectral_type;
+
+
+ALTER TABLE planets
+    ALTER COLUMN mass
+    TYPE numeric;
+
+ALTER TABLE planets
+    ALTER COLUMN mass SET NOT NULL,
+    ADD CONSTRAINT planet_mass CHECK (mass >= 0);
+
+ALTER TABLE planets
+    ADD CONSTRAINT mass_check CHECK (mass >= 0),
+    ALTER COLUMN mass SET NOT NULL;
+    
+INSERT INTO planets
+    (designation, mass, star_id)
+    VALUES ('A', 0, 8);
+-- or this
+ALTER TABLE planets
+ALTER COLUMN mass TYPE numeric,
+ALTER COLUMN mass SET NOT NULL,
+ADD CHECK (mass > 0.0),
+ALTER COLUMN designation SET NOT NULL;
