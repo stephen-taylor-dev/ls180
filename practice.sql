@@ -563,3 +563,151 @@ ALTER COLUMN mass TYPE numeric,
 ALTER COLUMN mass SET NOT NULL,
 ADD CHECK (mass > 0.0),
 ALTER COLUMN designation SET NOT NULL;
+
+
+ALTER TABLE books_categories
+ALTER COLUMN book_id
+    SET NOT NULL,
+ALTER COLUMN category_id
+    SET NOT NULL,
+DROP CONSTRAINT books_categories_book_id_fkey,
+DROP CONSTRAINT books_categories_category_id_fkey,
+ADD FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE,
+ADD FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE;
+
+SELECT books.id, books.author, string_agg(categories.name, ', ') 
+    FROM books
+        INNER JOIN books_categories ON books.id = books_categories.book_id
+        INNER JOIN categories ON books_categories.category_id = categories.id
+    GROUP BY books.id
+    ORDER BY books.id;
+
+INSERT INTO books
+        (author, title)
+    VALUES ('Lynn Sherr', 'Sally Ride: America''s First Woman in Space'),
+           ('Charlotte Brontë', 'Jane Eyre'),
+           ('Meeru Dhalwala and Vikram Vij', 'Vij''s: Elegant and Inspired Indian Cuisine');
+
+ALTER TABLE categories
+    ALTER COLUMN name
+    TYPE varchar(32);
+
+ALTER TABLE books
+    ALTER COLUMN title
+    TYPE varchar(45);
+
+INSERT INTO categories
+        (name)
+    VALUES ('Space Exploration'),
+           ('Cookbook'),
+           ('South Asia');
+
+DELETE FROM categories
+    WHERE id = 10 OR id = 11 OR id = 12;
+
+INSERT INTO books_categories
+        (book_id, category_id)
+    VALUES (4, 5),
+           (4, 1),
+           (4, 7),
+           (5, 2),
+           (5, 4),
+           (6, 8),
+           (6, 1),
+           (6, 9);
+
+ALTER TABLE books_categories
+    ADD UNIQUE (book_id, category_id);
+
+
+SELECT categories.name, count(books.id) AS book_count, 
+        string_agg(books.title, ', ') AS book_titles
+    FROM categories
+        INNER JOIN books_categories ON categories.id = books_categories.category_id
+        INNER JOIN books ON books_categories.book_id = books.id
+    GROUP BY categories.name
+    ORDER BY categories.name;
+
+CREATE TABLE films_directors (
+    id serial PRIMARY KEY,
+    film_id int NOT NULL REFERENCES films (id),
+    director_id int NOT NULL REFERENCES directors (id)
+);
+
+ALTER TABLE films_directors
+    DROP CONSTRAINT films_directors_director_id_fkey,
+    DROP CONSTRAINT films_directors_film_id_fkey,
+    ADD FOREIGN KEY (film_id) REFERENCES films (id) ON DELETE CASCADE,
+    ADD FOREIGN KEY (director_id) REFERENCES directors (id) ON DELETE CASCADE,
+    ADD UNIQUE (director_id, film_id);
+
+ALTER TABLE directors_films
+    ALTER COLUMN film_id
+    DROP NOT NULL;
+
+ALTER TABLE directors_films
+    ALTER COLUMN director_id
+    DROP NOT NULL;
+
+ALTER TABLE films_directors
+    RENAME TO directors_films;
+
+
+INSERT INTO directors_films
+        (film_id, director_id)
+    VALUES (1, 1),
+           (2, 2),
+           (3, 3),
+           (4, 4),
+           (5, 5),
+           (6, 6),
+           (7, 3),
+           (8, 7),
+           (9, 8),
+           (10, 4);
+
+ALTER TABLE films
+    DROP COLUMN director_id;
+
+
+SELECT films.title, directors.name 
+    FROM films
+    INNER JOIN directors_films ON films.id = directors_films.film_id
+    INNER JOIN directors ON directors_films.director_id = directors.id
+    ORDER BY films.title;
+
+
+UPDATE directors_films
+    SET director_id = 5
+    WHERE film_id = 10;
+
+
+INSERT INTO films (title, year, genre, duration)
+    VALUES ('Fargo', 1996, 'comedy', 98),
+           ('No Country for Old Men', 2007, 'western', 122),
+           ('Sin City', 2005, 'crime', 124),
+           ('Spy Kids', 2001, 'scifi', 88);
+
+INSERT INTO directors (name)
+    VALUES ('Joel Coen'),
+           ('Ethan Coen'),
+           ('Frank Miller'),
+           ('Robert Rodriguez');
+
+INSERT INTO directors_films (film_id, director_id)
+    VALUES (11, 9),
+           (12, 9),
+           (12, 10),
+           (13, 11),
+           (13, 12),
+           (14, 12);
+
+
+
+SELECT directors.name AS director, count(directors_films.film_id) AS films FROM directors
+    INNER JOIN directors_films ON directors.id = directors_films.director_id
+GROUP BY directors.id
+ORDER BY films DESC, director;
+
+
+SELECT 

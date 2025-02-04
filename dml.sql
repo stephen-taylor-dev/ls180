@@ -103,3 +103,5 @@ REFERENCES devices(id) ON DELETE CASCADE;
 
 DELETE FROM devices
     WHERE name = 'Accelerometer';
+
+
