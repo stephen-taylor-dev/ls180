@@ -103,6 +103,8 @@ ALTER TABLE planets
     SET NOT NULL;
 
 
+
+
 CREATE TABLE moons (
     id serial PRIMARY KEY,
     designation integer NOT NULL UNIQUE CHECK (designation > 0),
